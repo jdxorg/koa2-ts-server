@@ -4,7 +4,7 @@
 ### Setup
 ```bash
   # clone the repository
-  λ git clone https://github.com/mohuk/koa2-ts-init
+  λ git clone https://github.com/jdxorg/koa2-ts-server.git
   # change the current directory
   λ cd koa2-ts-init
   # install all dependencies
