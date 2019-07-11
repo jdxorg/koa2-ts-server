@@ -4,9 +4,9 @@
 ### Setup
 ```bash
   # clone the repository
-  λ git clone https://github.com/mohuk/koa2-ts-init
+  λ git clone https://github.com/jdxorg/koa2-ts-server.git
   # change the current directory
-  λ cd koa2-ts-init
+  λ cd koa2-ts-server
   # install all dependencies
   λ yarn
   # run the project
@@ -74,6 +74,7 @@ And many more small packages.
 ### 搭建环境
 - 安装mysql数据库 
   [mysql 下载](https://dev.mysql.com/downloads/mysql/)
+  [navicat 下载](https://www.navicat.com.cn/)
 ```
 1、配置系统环境变量
   变量名：MYSQL_HOME 
@@ -103,11 +104,12 @@ And many more small packages.
 8、退出mysql
   quit
 ```
-  [navicat 下载](https://www.navicat.com.cn/)
 - 安装redis服务器 
   [redis 下载](https://redis.io/)
   [redisclient 下载](https://github.com/caoxinyu/RedisClient)
-
+```
+  启动 redis-server
+```
 - 安装mongodb服务器 
   [mongo 下载](https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.10-signed.msi)
 
