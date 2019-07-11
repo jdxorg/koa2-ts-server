@@ -23,6 +23,6 @@ export const mongoConf = {
   port: 27017, 
   host:'127.0.0.1',
   username:'root',
-  password:'123456',
-  database:'db_account',
+  password:'root123456',
+  database:'admin',
 };

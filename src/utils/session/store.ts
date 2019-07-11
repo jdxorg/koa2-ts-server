@@ -7,6 +7,15 @@ class RedisStore {
   
   constructor() {
     this.redis = new Redis(redisConf);
+    this.redis.on('connect',()=> {
+      console.log('redis connect success') 
+    })
+    // this.redis.on('error',()=> {
+    //   console.log('redis error')
+    // })
+    // this.redis.on('close',()=> {
+    //   console.log('redis close')
+    // })
   }
 
   private getID(length: number): string {

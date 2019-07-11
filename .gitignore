@@ -37,3 +37,7 @@ node_modules
 
 # Configuration files
 src/conf/*.json
+
+out
+
+.vscode

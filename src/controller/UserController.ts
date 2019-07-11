@@ -7,7 +7,7 @@
  */
 import { Context } from 'koa';
 import {getManager, getRepository, Like, Equal} from "typeorm";
-import { cryptoPwd} from '../utils';
+import { cryptoPwd } from '../utils/tools';
 import T_User from '../entity/mysql/t_user';
 import { 
   ADD_SUCCESS,

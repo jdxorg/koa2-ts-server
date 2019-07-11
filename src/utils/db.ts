@@ -19,7 +19,7 @@ export const connectMysqlDB = (): void => {
     // logger   : 'simple-console'
   }).then(() => {
     console.log('mysql connect success!')
-  }).catch((err) => {
+  }).catch((err: any) => {
     console.log('mysql connect fail!', err)
   })  
 }
@@ -37,9 +37,9 @@ export const connectMongo = (): void => {
       "src/entity/mongo/**/*.ts" 
     ],
     logging  : _PROD_ ? false : true,
-  }).then((connect) => {
+  }).then(() => {
     console.log('mongo connect success!')
-  }).catch((err) => {
+  }).catch((err: any) => {
     console.log('mongo connect fail!', err)
   })  
 }

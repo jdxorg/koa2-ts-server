@@ -104,12 +104,34 @@ And many more small packages.
 8、退出mysql
   quit
 ```
-- 安装redis服务器 
+- 安装redis服务器 [使用方法](https://www.cnblogs.com/guzhanyu/p/8947940.html)
   [redis 下载](https://redis.io/)
   [redisclient 下载](https://github.com/caoxinyu/RedisClient)
 ```
-  启动 redis-server
+  启动 redis-server.exe redis.windows.conf --maxmemory 200M
 ```
-- 安装mongodb服务器 
+- 安装mongodb服务器 [使用方法](https://www.cnblogs.com/weschen/p/8213746.html)
   [mongo 下载](https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.10-signed.msi)
+  [NoSQLBooster for MongoDB](https://nosqlbooster.com/downloads)
+```
+  1、可以在安装目录 例如：C:\mongodb 中手动创建两个空文件夹
+  C:\mongodb\data\db
+  C:\mongodb\log
+  并在C:\mongodb\log下面创建一个空的mongo.log
+  2、启动服务器
+  λ >cd c:\mongodb\bin
+  λ >cd c:\mongodb\bin> mongod --dbpath C:\mongodb\data\db --logpath=C:\mongodb\log\mongodb.log --logappend
+  3、连接 使用cmd命令窗口，并进入至c:\mongodb\bin目录，运行命令
+  λ >cd c:\mongodb\bin> mongo
+  4、将mongodb作为windows服务启动：以上启动服务器只是一次性的，当关闭了命令窗口，服务器即会关闭，可以将mongodb作为windows启动，这样一开机，mongodb服务就已经启动了 
+  λ >c:\mongodb\bin> mongod --dbpath C:\mongodb\data\db --logpath=C:\mongodb\log\mongodb.log --logappend --install --serviceName "MongoDB"
+  5、使用配置文件启动mongodb服务
+  dbpath=C:\mongodb\data\db             # 数据库文件
+  logpath=C:\mongodb\log\mongodb.log    # 日志文件
+  logappend=true                        # 日志采用追加模式，配置后mongodb日志会追加到现有的日志文件，不会重新创建一个新文件
+  journal=true                          # 启用日志文件，默认启用
+  quiet=true                            # 这个选项可以过滤掉一些无用的日志信息，若需要调试使用请设置为 false
+  port=27017                            # 端口号 默认为 27017
+  λ >c:\mongodb\bin> sc create MongoDB binPath= "C:\mongodb\bin\mongod.exe --service --config=C:\mongodb\config\mongodb.conf"
+```
 
