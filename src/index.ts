@@ -6,8 +6,10 @@ import Catch from './middleware/catch';
 import { sysConf } from './conf/index';
 import { connectMysqlDB, connectMongo } from './utils/db';
 import Middlewares from './middleware/index';
-const _DEV_ = process.env.NODE_ENV === 'development'
 
+const _DEV_ = sysConf.get('env') === 'development';
+const log = debug('log:info');
+log.enabled = _DEV_;
 class Application {
   private app: Koa;
   constructor(){
@@ -23,7 +25,7 @@ class Application {
     this.app.keys = ['APP_Keys']; // set app keys
 		this.app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
 			const path = ctx.request.path
-			console.log(`path: ${path}`)
+			log(`path: ${path}`)
 			if(path === '/') {
 				ctx.body = 'Welcome to koa-graphql server.'
 			}
@@ -37,12 +39,9 @@ class Application {
   }
 
   private start(){
-    const d = debug('kickstarter:root');
     const port = sysConf.get('port')
-    d('current environment: %s', sysConf.get('env'));
-    d('server started at port: %d', port);
+    log(`current environment: ${sysConf.get('env')},Koa server has started, running with: http://127.0.0.1:${port}. `)
     this.app.listen(port,() => {
-      console.log(`Koa server has started, running with: http://127.0.0.1:${port}. `)
       connectMysqlDB() // db start after server running
       connectMongo() // connect mongodb
     });

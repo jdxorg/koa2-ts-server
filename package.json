@@ -4,7 +4,7 @@
   "description": "An opinionated boilerplate for koa v2 with typescript",
   "scripts": {
     "start": "node --inspect-brk bin/server",
-    "watch": "nodemon bin/server",
+    "watch": "nodemon --inspect-brk bin/server",
     "lint": "tslint 'src/**/*.ts'",
     "lint:fix": "tslint 'src/**/*.ts' --fix",
     "test": "jest"

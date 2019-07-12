@@ -10,9 +10,12 @@
   # install all dependencies
   λ yarn
   # run the project
-  λ npm run start
-```
+  λ yarn start
+  # run the project watch
+  λ yarn watch
+```  
 
+```
 ### Structure
 ```bash
 ├── README.md           # you're here
@@ -108,7 +111,8 @@ And many more small packages.
   [redis 下载](https://redis.io/)
   [redisclient 下载](https://github.com/caoxinyu/RedisClient)
 ```
-  启动 redis-server.exe redis.windows.conf --maxmemory 200M
+  手动启动 redis-server.exe redis.windows.conf --maxmemory 200M
+  配置到window服务 redis-server --service-install redis.windows-service.conf --loglevel verbose  
 ```
 - 安装mongodb服务器 [使用方法](https://www.cnblogs.com/weschen/p/8213746.html)
   [mongo 下载](https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.10-signed.msi)
@@ -134,4 +138,46 @@ And many more small packages.
   port=27017                            # 端口号 默认为 27017
   λ >c:\mongodb\bin> sc create MongoDB binPath= "C:\mongodb\bin\mongod.exe --service --config=C:\mongodb\config\mongodb.conf"
 ```
+
+### 调试
+```bash
+  # vscode 调试 
+  配置 vscode 调试文件  launch.json 
+  {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Program",
+        "program": "${workspaceFolder}\\src\\index.ts",
+        "preLaunchTask": "tsc: build - tsconfig.json",
+        "outFiles": [
+          "${workspaceFolder}/out/**/*.js"
+        ],
+        "runtimeExecutable": "nodemon", //自动重启 安装nodemon 或者 node-dev
+        "restart": true, //在终止 Node.js 后重启会话
+        "console": "integratedTerminal", //启动调试目标的位置，这里选择在 vscode 的集成终端输出信息
+        "skipFiles": [ //单步调试不进入node_modules
+          "${workspaceRoot}/node_modules/**/*.js",
+          "<node_internals>/**/*.js"
+        ]
+      }
+    ]
+  }
+  在launch.json中会使用到一些预定变量，这里说明一下：
+
+  ${workspaceRoot}：VSCode中打开文件夹的路径
+  ${workspaceRootFolderName}：VSCode中打开文件夹的路径, 但不包含"/"
+  ${file}：当前打开的文件
+  ${fileBasename}： 当前打开文件的文件名, 不含扩展名
+  ${fileDirname}： 当前打开文件的目录名
+  ${fileExtname} 当前打开文件的扩展名
+  ${cwd}：当前执行目录
+
+  # browser 调试 
+  打开inspector 
 

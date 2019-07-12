@@ -2,7 +2,7 @@ import {Entity, Column} from "typeorm";
 import BaseEntity from './BaseEntity';
 
 @Entity()
-export class Errors extends BaseEntity{
+export default class Errors extends BaseEntity{
   @Column()
   host: string
 

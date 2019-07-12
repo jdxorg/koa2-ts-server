@@ -1,7 +1,7 @@
 import { getMongoManager, getMongoRepository, Like, Between, FindManyOptions, Equal } from 'typeorm';
 import { Context } from 'koa';
-import { API } from '../entity/mongo/Api';
-import { Errors } from '../entity/mongo/Error';
+import API from '../entity/mongo/Api';
+import Errors from '../entity/mongo/Error';
 import { Guid , dateFormat } from '../utils/tools';
 
 export default class LogsController {
@@ -90,14 +90,19 @@ export default class LogsController {
       if(method === 'GET') {
         model.params = ctx.querystring;
       } else if(/^P(U|OS)T$/.test(method)) {
+        let params = (ctx.request as any ).body;
         if(/^\/account\/login$/.test(ctx.path)){
-          let params = ctx.fields;
-          params['password'] = '******';
+          params['loginPwd'] = '******';
         }
-        model.params = ctx.fields
+        model.params = params;
       }
       model.time = options.time;
-      const result = await getMongoManager('mongo').save(model);
+      try {
+        const result = await getMongoManager('mongo').save(model);
+        console.log('addApiLogger success',result);
+      } catch (error) {
+        console.log('addApiLogger error',error)
+      }
     }
   }
   /**
@@ -138,6 +143,11 @@ export default class LogsController {
     }
 
     model.time = options.time;  // deal time
-    const result = await getMongoRepository(Errors, 'mongo').save(model);
+    try {
+      const result = await getMongoRepository(Errors, 'mongo').save(model);
+      console.log('addErrorlogger',result)
+    } catch (error) {
+      console.log('addErrorlogger',error)
+    }
   }
 }

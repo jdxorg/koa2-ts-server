@@ -2,7 +2,7 @@ import {Entity, Column} from "typeorm";
 import BaseEntity from './BaseEntity';
 
 @Entity('api')
-export class API extends BaseEntity{
+export default class API extends BaseEntity{
   @Column()
   host: string
 

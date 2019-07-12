@@ -1,6 +1,10 @@
 import 'reflect-metadata';
 import { createConnection } from "typeorm";
 import { mysqlConf, mongoConf } from '../conf';
+import { Entities } from '../entity/mysql';
+import { MongoEntities } from '../entity/mongo';
+import { MongoEntities } from '../entity/mongo/index';
+
 const _PROD_ = process.env.NODE_ENV === 'production'
 
 export const connectMysqlDB = (): void => {
@@ -11,9 +15,7 @@ export const connectMysqlDB = (): void => {
     username : mysqlConf.username,
     password : mysqlConf.password,
     database : mysqlConf.database,
-    entities : [
-      "src/entity/mysql/**/*.ts" 
-    ],
+    entities : Entities,
     synchronize:true,//应用启动时确保你的实体和数据库保持同步
     logging  : _PROD_ ? false : true,
     // logger   : 'simple-console'
@@ -33,9 +35,11 @@ export const connectMongo = (): void => {
     username : mongoConf.username,
     password : mongoConf.password,
     database : mongoConf.database,
-    entities : [
-      "src/entity/mongo/**/*.ts" 
-    ],
+    entities:MongoEntities,
+    // entities : [
+    //   "src/entity/mongo/**/*.ts"  //这种配置形式在调试模式下无法正确连接数据库
+    // ],
+    synchronize:true,//应用启动时确保你的实体和数据库保持同步
     logging  : _PROD_ ? false : true,
   }).then(() => {
     console.log('mongo connect success!')

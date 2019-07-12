@@ -11,16 +11,16 @@ export const redisConf = {
   db: 0,
 };
 
-export const mysqlConf = {
-  port: 3306, 
+export const mysqlConf = { 
+  port: 3306,
   host:'127.0.0.1',
-  username:'root',
-  password:'123456',
+  username:'root', 
+  password:'123456', 
   database:'db_account',
 };
 
 export const mongoConf = {
-  port: 27017, 
+  port: 27017,
   host:'127.0.0.1',
   username:'root',
   password:'root123456',
