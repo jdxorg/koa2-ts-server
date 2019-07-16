@@ -8,3 +8,4 @@ export const NO_RECORD: string = '该数据记录不存在';
 export const LOGIN_SUCCESS: string = '登录成功';
 export const LOGOUT_SUCCESS: string = '退出成功';
 export const PASSWORD_ERROR: string = '用户名或密码错误！';
+export const TOEKN_INVALID: string = 'Authentication Error';

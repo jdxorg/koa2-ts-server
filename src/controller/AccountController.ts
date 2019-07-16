@@ -1,11 +1,13 @@
 import { Context } from 'koa';
-import Store  from '../utils/session/store';
-import { cryptoPwd} from '../utils/tools';
-import {getManager, getRepository, Like, Equal} from "typeorm";
-import T_User from '../entity/mysql/t_user';
-import { JWT_KEY,JWT_SECRET,EXP_TIME } from '../constants';
-import { sign } from '../core/jwt/sign';
-import { LOGIN_SUCCESS,LOGOUT_SUCCESS,PASSWORD_ERROR } from '../constants/message';
+import { cryptoPwd,dateFormat,DBHelper} from '../utils/tools';
+import { encode,decode,Store } from '../core';
+import {T_User} from '../entity/mysql';
+import { JWT_TOKEN,JWT_SECRET,CUR_USER,EXP_TIME} from '../constants';
+import { LOGIN_SUCCESS,LOGOUT_SUCCESS,PASSWORD_ERROR,TOEKN_INVALID } from '../constants/message';
+import { ErrorCode } from '../constants/code';
+import LogsController from './LogsController';
+
+
 const store = new Store();
 export default class AccountController {
 
@@ -15,7 +17,7 @@ export default class AccountController {
     const loginPwd: string = inputs.loginPwd;
     if ((loginName && loginName.length > 0) && (loginPwd && loginPwd.length > 5)) {
       // 查询数据库
-      const result = await getManager().findOne(T_User, {
+      const result = await DBHelper.manager().findOne(T_User, {
         select: ['id', 'loginName', 'userName', 'sex', 'state'],
         where: {
           username: loginName,
@@ -23,11 +25,13 @@ export default class AccountController {
         }
       });
       if (result) {
-        const token = sign({ ...result, exp: EXP_TIME }, JWT_SECRET)
-        await store.set('true', {
-          sid: token,
+        const token = encode({iss:result,iat:Date.now(), exp: Date.now() + EXP_TIME}, JWT_SECRET)
+        await LogsController.addLoginInfo(ctx,'login',result.id);
+        const token_sid = await store.set(token, {
+          sid: `${JWT_TOKEN}_${result.id}`,
           maxAge: EXP_TIME // millisecond
-        })
+        });
+        ctx.state[CUR_USER] = result;
         ctx.json({ data: token });
       } else {
         ctx.throw(400, PASSWORD_ERROR);
@@ -41,7 +45,14 @@ export default class AccountController {
     const tokens = ctx.header['authorization'];
     const token = tokens.split(' ')[1];
     const store = new Store;
-    await store.destroy(token);
-    ctx.json({ data: 1, msg: LOGOUT_SUCCESS });
+    const user = decode(token,JWT_SECRET);
+    try {
+      ctx.state[CUR_USER] = null;
+      await store.destroy(`${JWT_TOKEN}_${user.id}`);
+      await LogsController.addLoginInfo(ctx,'logout',user.id);
+      ctx.json({data:null, msg: LOGOUT_SUCCESS });
+    } catch (error) {
+      ctx.json({data:null, msg: TOEKN_INVALID,code:ErrorCode.TokenInvalid });
+    }
   }
 }

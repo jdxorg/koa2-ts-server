@@ -1,9 +1,8 @@
 import 'reflect-metadata';
 import { createConnection } from "typeorm";
-import { mysqlConf, mongoConf } from '../conf';
-import { Entities } from '../entity/mysql';
-import { MongoEntities } from '../entity/mongo';
-import { MongoEntities } from '../entity/mongo/index';
+import { mysqlConf, mongoConf } from '../../conf';
+import { Entities } from '../../entity/mysql';
+import { MongoEntities } from '../../entity/mongo';
 
 const _PROD_ = process.env.NODE_ENV === 'production'
 

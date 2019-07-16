@@ -4,7 +4,7 @@
   "description": "An opinionated boilerplate for koa v2 with typescript",
   "scripts": {
     "start": "node --inspect-brk bin/server",
-    "watch": "nodemon --inspect-brk bin/server",
+    "watch": "nodemon bin/server",
     "lint": "tslint 'src/**/*.ts'",
     "lint:fix": "tslint 'src/**/*.ts' --fix",
     "test": "jest"
@@ -17,6 +17,7 @@
     "convict": "^4.0.2",
     "debug": "^3.1.0",
     "ioredis": "^4.10.0",
+    "jwt-simple": "^0.5.6",
     "koa": "^2.5.0",
     "koa-bodyparser": "^2.5.0",
     "koa-compose": "^4.0.0",

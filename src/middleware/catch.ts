@@ -1,8 +1,9 @@
 import * as Koa from 'koa';
+import { log } from '../utils/tools';
 import LogCtrl from '../controller/LogsController';
 
 export default async (ctx: Koa.Context, next: () => Promise<any>) => {
-  console.log('ctx-----------', ctx)
+  log('ctx----------- %o', ctx)
   const start = Date.now()
   try {
     await next();

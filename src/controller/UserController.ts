@@ -2,12 +2,11 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-06-28 17:29:10
+ * @LastEditTime: 2019-07-16 18:10:09
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
-import {getManager, getRepository, Like, Equal} from "typeorm";
-import { cryptoPwd } from '../utils/tools';
+import { cryptoPwd,DBHelper } from '../utils/tools';
 import T_User from '../entity/mysql/t_user';
 import { 
   ADD_SUCCESS,
@@ -28,7 +27,7 @@ export default class UserController {
    * @return: 
    */
   public static async getList(ctx: Context): Promise<void> {
-    const users = await getManager().find(T_User);
+    const users = await DBHelper.manager().find(T_User);
     
     ctx.json({data:users})
   }
@@ -39,23 +38,21 @@ export default class UserController {
    * @return: 
    */
   public static async getListByPage(ctx: Context): Promise<void> {
+    const params = ctx.getParams;
     const data = (ctx.request as any).body;
-    const { page, pageSize, sex} = data;
-    let strWhere: string = 'user.state = 0';
-    if(sex){
-      strWhere += `${strWhere} and user.sex=${sex}`
-    }
+    const {sex=null,state=0} = data;
+    const options = DBHelper.getManyOptions<T_User>({
+      offset:params.offset,
+      limit:params.limit,
+      order:{id:'DESC'},
+      where:{
+        state,
+        sex,
+      }
+    });
     try {
-      const respository = getRepository(T_User).createQueryBuilder('user');
-      const total = await respository.getCount()
-      const list = await respository
-      .where(strWhere)
-      .orderBy("user.id", "DESC")
-      .skip((page-1)*pageSize)
-      .take(pageSize)
-      .getMany();
-      
-      ctx.page({total,list,page,pageSize})
+      const pages = await DBHelper.respository(T_User).findAndCount(options);
+      ctx.page({list:pages[0],total:pages[1]})
     } catch (error) {
       throw(error)
     }
@@ -79,7 +76,7 @@ export default class UserController {
     model.createdBy = '0';
     model.createdAt = parseInt((Date.now()/1000).toString());
     try {
-      const result = await getRepository(T_User).save(model);
+      const result = await DBHelper.respository(T_User).save(model);
       ctx.json({data:result,msg:ADD_SUCCESS});
     } catch (error) {
       ctx.json({data:null,msg:ADD_FAIL});
@@ -93,12 +90,12 @@ export default class UserController {
   public static async modify(ctx: Context): Promise<void> {
     let data = ctx.params;
     const { id } = data;
-    const model = await getRepository(T_User).findOne(id);
+    const model = await DBHelper.respository(T_User).findOne(id);
     if( model ){
       model.updatedBy = '1';
       model.updatedAt = parseInt((Date.now()/1000).toString());
       try {
-        const result = await getRepository(T_User).save(model);
+        const result = await DBHelper.respository(T_User).save(model);
         ctx.json({data:result,msg:MODIFY_SUCCESS});
       } catch (error) {
         ctx.json({data:id,msg:MODIFY_FAIL});
@@ -115,10 +112,10 @@ export default class UserController {
   public static async removeById(ctx: Context): Promise<void> {
     let data = ctx.params;
     const { id } = data;
-    const model = await getRepository(T_User).findOne(id);
+    const model = await DBHelper.respository(T_User).findOne(id);
     if(model){
       try {
-        const result = await getRepository(T_User).remove(model);
+        const result = await DBHelper.respository(T_User).remove(model);
         ctx.body = {code:0,message:'success'};
         ctx.json({data:id,msg:DELETE_SUCCESS});
       } catch (error) {

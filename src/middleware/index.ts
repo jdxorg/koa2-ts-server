@@ -1,12 +1,10 @@
 import * as Koa from 'koa';
-// import Auth from './auth'
-// import Cors from './cors';
-// import JWT from './xJwt'
-const koaBordyParser = require('koa-bodyparser');
 import * as jsonMiddleware from 'koa-json';
 import requestMiddleware from './request';
 import ResponseMiddleware from './response';
 import routeMiddleware from '../route';
+import Auth from './auth';
+const koaBordyParser = require('koa-bodyparser');
 
 const Middlewares = (app: Koa) => {
   
@@ -15,6 +13,7 @@ const Middlewares = (app: Koa) => {
   app.use(requestMiddleware);
   app.use(ResponseMiddleware);
   app.use(routeMiddleware());
+  app.use(Auth);
 };
 
 export default Middlewares;

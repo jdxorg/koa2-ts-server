@@ -1,68 +1,46 @@
-import * as Crypto from 'crypto';
+/*
+ * @Description: 
+    jwt_encode(payload, key, algorithm, options)
+    jwt_decode(token, key, noVerify, algorithm)
+    //algorithm = HS256, 
+                  HS384, 
+                  HS512,
+                  RS256.
+ * @Author: your name
+ * @Date: 2019-07-11 14:10:03
+ * @LastEditTime: 2019-07-16 11:27:43
+ * @LastEditors: Please set LastEditors
+ */
+const jwt = require('jwt-simple');
 
 interface IPayloadOptions {
-  exp: number;  // delta time
   [key: string]: any;
+  iss: any, //token(Issuer) 签发者
+  sub?: string, //jwt(Subject)所面向的用户
+  aud?: string, //token(Audience) 收件人
+  exp?: number, //token (Expiration Time)的过期时间，一般当前时间加期限
+  nbf?: any,  //(Not Before)验证该时间之前token 无效
+  iat?: number, //token(Issued At) 签发时间
+  jti?: string, //jwt (JWT ID)的唯一身份标识，主要用来作为一次性token,从而回避重放攻击
 }
 
-class Options {
-  alg?: string = 'HS256';
-  typ?: string = 'JWT';
-  expiresIn?: number;
-  encoding?: BufferEncoding ='utf-8';
+const alg = 'HS256';
+/**
+ * @description: 加密token
+ * @param {type} 
+ * @return: 
+ */
+export const encode = (payload: IPayloadOptions, secret: string|Buffer,algorithm: string = alg) => {
+  const token = jwt.encode(payload,secret,algorithm);
+  return token;
 }
 
-export function createHmacSigner (thing: string, secret: string | Buffer): string {
-  let sig = Crypto.createHmac('sha256', secret).update(thing).digest('base64')
-  return sig.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-}
-
-function toString(obj: any) {
-  if (typeof obj === 'string') {
-    return obj;
-  }
-  if (typeof obj === 'number') {
-    return obj.toString();
-  }
-  if (Buffer.isBuffer(obj)) {
-    return obj.toString();
-  }
-  return JSON.stringify(obj);
-}
-
-function base64url(string: string, encoding: BufferEncoding): string {
-  return Buffer
-    .from(string, encoding)
-    .toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-}
-
-function jwtSecuredInput(header: any, payload: any, encoding: BufferEncoding | undefined) {
-  encoding = encoding || 'utf-8';
-  let encodedHeader = base64url(toString(header), 'binary');
-  let encodedPayload = base64url(toString(payload), encoding);
-  return `${encodedHeader}.${encodedPayload}`
-}
-
-// sign jwt
-
-export const sign = (payload: IPayloadOptions, secret: string | Buffer, opts: Options = new Options) => {
-
-  let header = opts;
-
-  if(payload.exp <= 0) {
-    throw new Error('the payload.exp must be greater than 0')
-  }
-
-  payload.iat = Date.now() // sign time
-  payload.exp = payload.iat + payload.exp // expire time, become time stamp
-  
-  let secretOrKey = secret;
-  let encoding = opts.encoding;
-  let securedInput = jwtSecuredInput(header, payload, encoding);
-  let signature = createHmacSigner(securedInput, secretOrKey);
-  const signStr = `${securedInput}.${signature}`
-  return signStr
+/**
+ * @description: 解密token
+ * @param {type} 
+ * @return: 
+ */
+export const decode = (token: string, secret: string|Buffer, noVerify: boolean = false,algorithm: string = alg) => {
+  const decoded = jwt.decode(token,secret,noVerify,algorithm);
+  return decoded.iss;
 }

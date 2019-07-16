@@ -10,12 +10,6 @@ class RedisStore {
     this.redis.on('connect',()=> {
       console.log('redis connect success') 
     })
-    // this.redis.on('error',()=> {
-    //   console.log('redis error')
-    // })
-    // this.redis.on('close',()=> {
-    //   console.log('redis close')
-    // })
   }
 
   private getID(length: number): string {
@@ -24,13 +18,15 @@ class RedisStore {
 
   public async get(sid: string): Promise<string> {
     let data = await this.redis.get(sid);
-    return JSON.parse(data?data:'');
+    return data;
   }
  
   public async set(obj: any, { sid =  this.getID(32), maxAge }: any = {}): Promise<string> {
     try {
-      await this.redis.set(sid, JSON.stringify(obj), 'PX', maxAge)
-    } catch (e) {}
+      await this.redis.set(sid, obj, 'PX', maxAge)
+    } catch (e) {
+      console.log(e);
+    }
     return sid;
   }
 

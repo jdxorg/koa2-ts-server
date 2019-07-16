@@ -1,8 +1,9 @@
-import { getMongoManager, getMongoRepository, Like, Between, FindManyOptions, Equal } from 'typeorm';
 import { Context } from 'koa';
 import API from '../entity/mongo/Api';
 import Errors from '../entity/mongo/Error';
-import { Guid , dateFormat } from '../utils/tools';
+import { T_User_Login_Info } from '../entity/mysql';
+import { Guid , dateFormat,DBHelper } from '../utils/tools';
+import { CUR_USER,SYSTEM_PLATFORM } from '../constants/index';
 
 export default class LogsController {
 
@@ -12,7 +13,7 @@ export default class LogsController {
    * @return: 
    */
   static async getById(id: string = '') {
-    const api = await getMongoRepository(API,'mongo').findOne({id});
+    const api = await DBHelper.mongoRespository('API').findOne({id});
     return api;
   }
   /**
@@ -22,46 +23,16 @@ export default class LogsController {
    */
   static async getApiPages(ctx: Context) {
     const params = ctx.getParams;
-    const query = ctx.query;
-
-    const options: FindManyOptions<API> = {
-      skip: params.offset,
-      take: params.limit,
-      order: {
-        createdAt: 'DESC',
-      },
-      where:{},
-    };
-    if(query.path) {
-      options.where['path'] = query.path;
-    }
-    if(query.url) {
-      options.where['url'] = query.url;
-    }
-    const pages = await getMongoRepository('API','mongo').findAndCount(options);
-    ctx.page({data: pages});
+    const options = DBHelper.getManyOptions<API>({offset:params.offset,limit:params.limit,order:{createdAt:'DESC'}});
+    const pages = await DBHelper.mongoRespository('API').findAndCount(options);
+    ctx.page({list: pages[0], total: pages[1]}); 
   }
 
   static async getErrorPages(ctx: Context) {
     const params = ctx.getParams;
-    const query = ctx.query;
-
-    const options: FindManyOptions<Errors> = {
-      skip: params.offset,
-      take: params.limit,
-      order: {
-        createdAt: 'DESC',
-      },
-      where:{},
-    };
-    if(query.path) {
-      options.where['path'] = query.path;
-    }
-    if(query.url) {
-      options.where['url'] = query.url;
-    }
-    const pages = await getMongoRepository('Errors','mongo').findAndCount(options);
-    ctx.page({data: pages}); 
+    const options = DBHelper.getManyOptions<API>({offset:params.offset,limit:params.limit,order:{createdAt:'DESC'}});
+    const pages = await DBHelper.mongoRespository('Errors').findAndCount(options);
+    ctx.page({list: pages[0], total: pages[1]}); 
   }
  /**
    * @description: api log
@@ -98,8 +69,7 @@ export default class LogsController {
       }
       model.time = options.time;
       try {
-        const result = await getMongoManager('mongo').save(model);
-        console.log('addApiLogger success',result);
+        const result = await DBHelper.mongoManager.save(model);
       } catch (error) {
         console.log('addApiLogger error',error)
       }
@@ -135,19 +105,37 @@ export default class LogsController {
     if(method === 'GET') {
       model.params = ctx.querystring;
     } else if(/^P(U|OS)T$/.test(method)){
-      if(/^\/api\/login$/.test(ctx.path)){
-        let params = ctx.fields;
-        params['password'] = '******';
+      if(/^\/account\/login$/.test(ctx.path)){
+        let params = (ctx.request as any ).body;
+        params['loginPwd'] = '******';
       }
       model.params = ctx.fields;
     }
 
     model.time = options.time;  // deal time
     try {
-      const result = await getMongoRepository(Errors, 'mongo').save(model);
-      console.log('addErrorlogger',result)
+      const result = await DBHelper.mongoRespository('Errors').save(model);
     } catch (error) {
       console.log('addErrorlogger',error)
+    }
+  }
+
+   /**
+   * @description: 登录/登出日志
+   * @param {type} 
+   * @return: 
+   */
+  public static async addLoginInfo(ctx: Context,operate: string,id: number): Promise<void> {
+    let model: T_User_Login_Info  = new T_User_Login_Info();
+    model.user_id = id?id:-1;
+    model.last_ip = ctx.header['x-real-ip'] || ctx.req.connection.remoteAddress;
+    model.last_time = dateFormat(Date.now(),'YYYY/MM/DD HH:mm:ss.SSS');
+    model.system_type = SYSTEM_PLATFORM.ADMIN;
+    model.operate = operate;
+    try {
+      const result = await DBHelper.respository(T_User_Login_Info).save(model);
+    } catch (error) {
+      console.log('addLoginInfo error',error)
     }
   }
 }
