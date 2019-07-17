@@ -69,7 +69,7 @@ export default class LogsController {
       }
       model.time = options.time;
       try {
-        const result = await DBHelper.mongoManager.save(model);
+        const result = await DBHelper.mongoManager().save(model);
       } catch (error) {
         console.log('addApiLogger error',error)
       }

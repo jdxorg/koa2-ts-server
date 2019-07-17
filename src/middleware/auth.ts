@@ -1,27 +1,32 @@
 import { Context } from 'koa';
-import { verify } from '../core';
 import { NO_AUTH_URLS,JWT_SECRET } from '../constants';
 import { TOEKN_INVALID } from '../constants/message';
 import { log } from '../utils/tools';
 
-export default async(ctx: Context, next: ()=> Promise<any>)=> {
+const jwt = require('jsonwebtoken');
+const auth = async(ctx: Context, next: ()=> Promise<any>)=> {
   const method = ctx.method;
   const path = ctx.path;
-  if(NO_AUTH_URLS.some(urlReg => urlReg[0].test(path) && urlReg[1].test(method))) {
+  const isNoAuth = NO_AUTH_URLS.some(urlReg => urlReg[0].test(path) && urlReg[1].test(method))
+  if(isNoAuth) {
     await next()
   }else {
-    const token = ctx.header['authorization'];
+    let token;
+    const tokens = ctx.header['authorization'];
+    if( tokens ){
+      token = tokens.split(' ')[1]
+    }
     if(!token) {
       ctx.throw(401, 'Token not found' )
     }
     try{
-      let result = verify(token,{secret:JWT_SECRET});
-      // 如果考验通过就next，否则就返回登陆信息不正确
-      if (!result[0]) {
-        ctx.throw(401, result[1])
-      }
+      jwt.verify(token,JWT_SECRET);
+      await next()
     }catch(e){
+      // invalid token - synchronous
       ctx.throw(401, e.message, { originalError: e });
     }
   }
 }
+
+export default auth;

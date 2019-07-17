@@ -11,9 +11,9 @@ const Middlewares = (app: Koa) => {
   app.use(koaBordyParser());
   app.use(jsonMiddleware());
   app.use(requestMiddleware);
+  app.use(Auth);
   app.use(ResponseMiddleware);
   app.use(routeMiddleware());
-  app.use(Auth);
 };
 
 export default Middlewares;

@@ -1,3 +1,7 @@
+// import fs from 'fs'
+// import path from 'path'
+
+// const publicKey = fs.readFileSync(path.join(__dirname, '../../publicKey.pub'))
 
 const _PROD_ = process.env.NODE_ENV === 'production'
 
@@ -24,6 +28,4 @@ export enum SYSTEM_PLATFORM {
 // don't need auth url
 export const NO_AUTH_URLS = [
   [/\/account\/login/,  /^post$/i],
-  [/\/graphql/, /^get$/i],
-  [/\/view/,  /^get$/i]
 ]
