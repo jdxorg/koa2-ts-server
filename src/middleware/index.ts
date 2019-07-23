@@ -4,6 +4,7 @@ import requestMiddleware from './request';
 import ResponseMiddleware from './response';
 import routeMiddleware from '../route';
 import Auth from './auth';
+import Cors from './cors';
 const koaBordyParser = require('koa-bodyparser');
 
 const Middlewares = (app: Koa) => {
@@ -12,6 +13,7 @@ const Middlewares = (app: Koa) => {
   app.use(jsonMiddleware());
   app.use(requestMiddleware);
   app.use(Auth);
+  app.use(Cors);
   app.use(ResponseMiddleware);
   app.use(routeMiddleware());
 };

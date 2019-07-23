@@ -13,8 +13,8 @@ export default class AccountController {
 
   public static async login(ctx: Context) {
     const inputs: any = (ctx.request as any).body;
-    const loginName: string = inputs.loginName;
-    const loginPwd: string = inputs.loginPwd;
+    const loginName: string = inputs.username;
+    const loginPwd: string = inputs.password;
     if ((loginName && loginName.length > 0) && (loginPwd && loginPwd.length > 5)) {
       // 查询数据库
       const result = await DBHelper.manager().findOne(T_User, {

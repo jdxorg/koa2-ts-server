@@ -11,11 +11,14 @@ const router = new Router();
 router
   .post('/account/login',AccountController.login)
   .post('/account/logout',AccountController.logout)
-  .get('/account/users', UserController.getList)
-  .get('/account/userpage', UserController.getListByPage)
+  .get('/account/menus',UserController.getMenus)
+  // .get('/account/users', UserController.getList)
+  .get('/account/user', UserController.getListByPage)
   .post('/account/user', UserController.add)
-  .post('/account/user/:id', UserController.modify)
+  .put('/account/user/:id', UserController.modify)
   .delete('/account/user/:id', UserController.removeById)
+  .get('/account/user/:id',UserController.queryById)
+  .get('/account/userInfo',UserController.queryInfo)
   .get('/api/logger', LogsController.getApiPages);
 
 const routes = router.routes();

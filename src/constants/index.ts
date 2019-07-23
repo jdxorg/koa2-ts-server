@@ -27,5 +27,5 @@ export enum SYSTEM_PLATFORM {
 
 // don't need auth url
 export const NO_AUTH_URLS = [
-  [/\/account\/login/,  /^post$/i],
+  [/\/account\/login/,  /^post|options$/i],
 ]

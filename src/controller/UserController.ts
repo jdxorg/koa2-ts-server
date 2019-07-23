@@ -2,12 +2,12 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-16 18:10:09
+ * @LastEditTime: 2019-07-23 18:23:15
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
 import { cryptoPwd,DBHelper } from '../utils/tools';
-import T_User from '../entity/mysql/t_user';
+import {T_User} from '../entity/mysql';
 import { 
   ADD_SUCCESS,
   ADD_FAIL,
@@ -18,9 +18,72 @@ import {
   NO_RECORD
 } from '../constants/message';
 // import BaseController from '../abstract/BaseController';
+const jwt = require('jsonwebtoken');
+const EnumRoleType = {
+  ADMIN: 'admin',
+  DEFAULT: 'guest',
+  DEVELOPER: 'developer',
+}
+const userPermission = {
+  DEFAULT: {
+    visit: ['1', '2', '21', '7', '5', '51', '52', '53'],
+    role: EnumRoleType.DEFAULT,
+  },
+  ADMIN: {
+    role: EnumRoleType.ADMIN,
+  },
+  DEVELOPER: {
+    role: EnumRoleType.DEVELOPER,
+  },
+}
 
 export default class UserController {
 
+  /**
+   * 获取当前用户
+   * @param ctx 
+   */
+  public static async queryInfo(ctx: Context): Promise<void> {
+    const authorization = ctx.header['authorization'];
+    const token = authorization.split(' ')[1];
+    const {user} = jwt.decode(token);
+    let result=null;
+    try {
+      result = await DBHelper.manager().findOne(T_User,{
+        select:[
+          'id',
+          'loginName',
+          'userName',
+          'nickName',
+          'age',
+          'mobile',
+          'email',
+          'gender',
+          'remark',
+          'state',
+          'address',
+          'avatar',
+          'createAt',
+          'createBy',
+        ],
+        where:{
+          id:user.id,
+        }
+      });
+      result.permissions = userPermission.ADMIN;
+    } catch (error) {
+      
+    }
+    ctx.json({data:result});
+  }
+
+  /**
+   * 根据id查询
+   * @param ctx 
+   */
+  public static async queryById(ctx: Context): Promise<void> {
+    console.log(ctx);
+  }
   /**
    * @description: 获取所有用户列表
    * @param {type} 
@@ -124,5 +187,90 @@ export default class UserController {
     }else{
       ctx.json({data:id,msg:NO_RECORD});
     }
+  }
+
+  public static async getMenus(ctx: Context) {
+    const database = [
+      { id: '1',
+        icon: 'dashboard',
+        name: 'Dashboard',
+        zh: {
+          name: '仪表盘'
+        },
+        route: '/dashboard',
+      },
+      {
+        id: '2',
+        name: 'Account',
+        zh: {
+          name: '账户管理'
+        },
+        icon: 'user',
+        route:'/account',
+        children:[
+          {id:'21',parentid:'2',name:'user',zh: {name: '用户管理'},icon:'user',route:'/account/user'},
+          {id:'22',parentid:'2',name:'role',zh: {name: '角色管理'},icon:'user',route:'/account/role'},
+        ]
+      },
+      {
+        id: '7',
+        name: 'Posts',
+        zh: {
+          name: '岗位管理'
+        },
+        icon: 'shopping-cart',
+        route: '/post',
+      },
+      {
+        id: '3',
+        name: 'Request',
+        zh: {
+          name: 'Request'
+        },
+        icon: 'api',
+        route: '/request',
+      },
+      {
+        id: '4',
+        name: 'UI Element',
+        zh: {
+          name: 'UI组件'
+        },
+        icon: 'camera-o',
+        route:'/UIElement',
+        children:[
+          { id: '41',parentid: '4',name: 'Button',zh: {name: 'Button'},icon: 'edit',route: '/UIElement/button',},
+          { id: '42',parentid: '4',name: 'Form',zh: {name: 'Form'},icon: 'edit',route: '/UIElement/form',},
+          { id: '43',parentid: '4',name: 'Table',zh: {name: 'Table'},icon: 'edit',route: '/UIElement/table',},
+          { id: '44',parentid: '4',name: 'Editor',zh: {name: 'Editor'},icon: 'edit',route: '/UIElement/editor',},
+        ]
+      },
+      {
+        id: '5',
+        name: 'Charts',
+        zh: {
+          name: 'Charts'
+        },
+        icon: 'code-o',
+        route:'/chart',
+        children:[
+          {id: '51', parentid: '5',name: 'ECharts',zh: { name: 'ECharts'}, icon: 'line-chart',route: '/chart/ECharts',},
+          {id: '52', parentid: '5',name: 'HighCharts',zh: { name: 'HighCharts'}, icon: 'bar-chart',route: '/chart/highCharts',},
+          {id: '53', parentid: '5',name: 'Rechartst',zh: { name: 'Rechartst'}, icon: 'area-chart',route: '/chart/Recharts',},
+        ]
+      },
+      {
+        id: '6',
+        name: 'Test',
+        zh: {
+          name: '测试'
+        },
+        icon: 'code-o',
+        route:'/test',
+        hideInMenu: true,
+        authority: ['admin'],
+      },
+    ]
+    ctx.json({data:database})
   }
 }

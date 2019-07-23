@@ -5,6 +5,7 @@ import { BaseEntity } from './BaseEntity'
 export default class T_User extends BaseEntity {
 
   @Column()
+  ///登陆账号
   loginName: string;
 
   @Column()
@@ -24,13 +25,21 @@ export default class T_User extends BaseEntity {
   @Column({
     nullable:true
   })
-  sex?: number;
+  gender?: number;
 
   @Column({
     length:100,
     nullable:true 
   })
+  ///用户姓名
   userName?: string;
+
+  @Column({
+    length:100,
+    nullable:true 
+  })
+  ///昵称
+  nickName?: string;
 
   @Column({
     type:'text',
@@ -41,4 +50,17 @@ export default class T_User extends BaseEntity {
   @Column()
   state: number;
 
+  @Column()
+  age: number;
+
+  @Column({
+    nullable:true 
+  })
+  address?: string;
+
+  @Column({
+    nullable:true 
+  })
+  ///头像
+  avatar?: string;
 }

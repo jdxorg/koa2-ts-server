@@ -22,7 +22,7 @@ export default async (ctx: Koa.Context, next: () => Promise<any>) => {
       LogCtrl.addApiLogger(ctx, { time: Date.now() - start }) // api log
     }
   } catch (err) {
-    // console.log('catch', err, err.status);
+    // log('catch', err.status);
     try {
       let status: number = err.status || 500;
       LogCtrl.addErrorlogger(ctx, {

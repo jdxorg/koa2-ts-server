@@ -105,11 +105,11 @@ export default class LogsController {
     if(method === 'GET') {
       model.params = ctx.querystring;
     } else if(/^P(U|OS)T$/.test(method)){
+      let params = (ctx.request as any ).body;
       if(/^\/account\/login$/.test(ctx.path)){
-        let params = (ctx.request as any ).body;
         params['loginPwd'] = '******';
       }
-      model.params = ctx.fields;
+      model.params = params;
     }
 
     model.time = options.time;  // deal time
