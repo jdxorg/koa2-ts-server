@@ -16,7 +16,7 @@ class RedisStore {
     return randomBytes(length).toString('hex');
   }
 
-  public async get(sid: string): Promise<string> {
+  public async get(sid: string): Promise<string|null> {
     let data = await this.redis.get(sid);
     return data;
   }

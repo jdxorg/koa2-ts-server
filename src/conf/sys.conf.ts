@@ -24,6 +24,11 @@ const conf = convict({
     default: 4000,
     env: 'PORT',
   },
+  protocol: {
+    doc:'Protocol is  http/https',
+    default:'http://',
+    env:'PROTOCOL',
+  },
 });
 const d = debug('kickstarter:conf');
 const env = conf.get('env');

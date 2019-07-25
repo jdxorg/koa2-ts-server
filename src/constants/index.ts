@@ -29,3 +29,4 @@ export enum SYSTEM_PLATFORM {
 export const NO_AUTH_URLS = [
   [/\/account\/login/,  /^post|options$/i],
 ]
+

@@ -7,6 +7,8 @@ import Middlewares from './middleware/index';
 import { connectMysqlDB, connectMongo } from './utils/database/db';
 import { _DEV_,log } from './utils';
 
+const serve = require('koa-static');
+const onerror = require('koa-onerror');
 class Application {
   private app: Koa;
   constructor(){
@@ -17,8 +19,10 @@ class Application {
   private init (){
     if( _DEV_ ){
       this.app.use(KoaLogger());
+      onerror(this.app)
     }
     this.app.use(Catch);
+    this.app.use(serve(__dirname + '/uploads'))
     this.app.keys = ['APP_Keys']; // set app keys
 		// this.app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
 		// 	const path = ctx.request.path

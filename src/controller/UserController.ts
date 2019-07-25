@@ -2,7 +2,7 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-23 18:23:15
+ * @LastEditTime: 2019-07-24 14:48:48
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
@@ -63,12 +63,12 @@ export default class UserController {
           'state',
           'address',
           'avatar',
-          'createAt',
-          'createBy',
+          'createdAt',
+          'createdBy',
         ],
         where:{
           id:user.id,
-        }
+        },
       });
       result.permissions = userPermission.ADMIN;
     } catch (error) {
@@ -107,7 +107,7 @@ export default class UserController {
     const options = DBHelper.getManyOptions<T_User>({
       offset:params.offset,
       limit:params.limit,
-      order:{id:'DESC'},
+      order:{id:'ASC'},
       where:{
         state,
         sex,

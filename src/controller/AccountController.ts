@@ -18,7 +18,7 @@ export default class AccountController {
     if ((loginName && loginName.length > 0) && (loginPwd && loginPwd.length > 5)) {
       // 查询数据库
       const result = await DBHelper.manager().findOne(T_User, {
-        select: ['id', 'loginName', 'userName', 'sex', 'state'],
+        select: ['id', 'loginName', 'userName','nickName','age', 'gender', 'state'],
         where: {
           username: loginName,
           password: cryptoPwd(loginPwd, loginName)

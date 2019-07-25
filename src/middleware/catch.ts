@@ -3,13 +3,16 @@ import { log } from '../utils/tools';
 import LogCtrl from '../controller/LogsController';
 
 export default async (ctx: Koa.Context, next: () => Promise<any>) => {
-  log('ctx----------- %o', ctx)
+  // log('ctx----------- %o', ctx)
   const start = Date.now()
   try {
     await next();
     const status: number = ctx.status || 404;
     if (status === 404) {
       ctx.throw(404);
+    }
+    if( status === 204 || status === 200 ){
+      return;
     }
     if(ctx.path === '/graphql' && ctx.body.errors) {
       LogCtrl.addErrorlogger(ctx, {
@@ -18,7 +21,7 @@ export default async (ctx: Koa.Context, next: () => Promise<any>) => {
         errors: ctx.body.errors,
         msg: ctx.body.errors[0].message
       }); // error log
-    } else {
+    } else{
       LogCtrl.addApiLogger(ctx, { time: Date.now() - start }) // api log
     }
   } catch (err) {
