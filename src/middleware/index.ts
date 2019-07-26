@@ -5,6 +5,7 @@ import ResponseMiddleware from './response';
 import routeMiddleware from '../route';
 import Auth from './auth';
 import Cors from './cors';
+
 const koaBody = require('koa-body');
 const path = require('path');
 const fs = require('fs');
@@ -13,7 +14,6 @@ const Middlewares = (app: Koa) => {
   
   app.use(koaBody({
     multipart:true, // 支持文件上传
-    encoding:'gzip',
     formidable:{
       uploadDir:path.join(__dirname,'../uploads'), // 设置文件上传目录
       keepExtensions: true,    // 保持文件的后缀

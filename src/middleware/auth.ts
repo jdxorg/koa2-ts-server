@@ -8,10 +8,11 @@ const auth = async(ctx: Context, next: ()=> Promise<any>)=> {
   const method = ctx.method;
   const path = ctx.path;
   const isNoAuth = NO_AUTH_URLS.some(urlReg => urlReg[0].test(path) && urlReg[1].test(method))
-
+  
   if(isNoAuth 
     || method === 'OPTIONS' 
-    || path === '/favicon.ico') {//如果是跨域预检请求放行
+    || path === '/favicon.ico'
+    || ~path.indexOf('/images/')) {//如果是跨域预检请求放行
     await next()
   }else {
     let token;

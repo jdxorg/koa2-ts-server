@@ -17,7 +17,7 @@ export default class UploadController {
     // 获取文件类型
     const type = file.type
     // 获取文件名，并根据文件名获取扩展名
-    let filename = file.name
+    let filename = file.name;
     let extname = filename.lastIndexOf('.') >= 0 ? filename.slice(filename.lastIndexOf('.') - filename.length) : ''
     // 文件名没有扩展名时候，则从文件类型中取扩展名
     if (extname === '' && type.indexOf('/') >= 0) {
@@ -59,7 +59,7 @@ export default class UploadController {
    * @return: 
    */
   public static async uploadFile(ctx: Context) {
-    const file = ctx.request.files.file;
+    const file = (ctx.request as any).files.file;
     const result = UploadController.upload(file);
     ctx.json({data:result});
   }
@@ -70,7 +70,7 @@ export default class UploadController {
    * @return: 
    */
   public static async uploadFiles(ctx: Context) {
-    const files = ctx.request.files.file;
+    const files = (ctx.request as any).files.file;
     let result = ''
     for(let file of files){
       result = UploadController.upload(files);

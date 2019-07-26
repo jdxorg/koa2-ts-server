@@ -1,7 +1,10 @@
+import { Context } from 'koa';
 import { randomBytes } from 'crypto';
 import * as Redis from 'ioredis';
 import { redisConf } from '../../conf';
+import { JWT_SECRET } from '../../constants';
 
+const jwt = require('jsonwebtoken');
 class RedisStore {
   private redis: Redis.Redis
   
@@ -38,6 +41,17 @@ class RedisStore {
     const sid = await this.redis.get(userId);
     if (sid) await this.destroy(sid);
     return sid?sid:'';
+  }
+
+  public getLoginer(ctx: Context) {
+    const tokens = ctx.header['authorization'];
+    let user = null;
+    if(tokens){
+      const token = tokens.split(' ')[1];
+      const data = jwt.verify(token,JWT_SECRET);
+      user = data?data.user:null;
+    }
+    return user;
   }
 }
 

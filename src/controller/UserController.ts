@@ -2,7 +2,7 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-24 14:48:48
+ * @LastEditTime: 2019-07-26 17:48:09
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
@@ -17,8 +17,10 @@ import {
   DELETE_FAIL,
   NO_RECORD
 } from '../constants/message';
+import { Store } from '../core';
 // import BaseController from '../abstract/BaseController';
 const jwt = require('jsonwebtoken');
+const store = new Store();
 const EnumRoleType = {
   ADMIN: 'admin',
   DEFAULT: 'guest',
@@ -36,6 +38,24 @@ const userPermission = {
     role: EnumRoleType.DEVELOPER,
   },
 }
+const select = [
+  'id',
+  'loginName',
+  'userName',
+  'nickName',
+  'age',
+  'mobile',
+  'email',
+  'gender',
+  'remark',
+  'state',
+  'address',
+  'addressCode',
+  'familyAddress',
+  'avatar',
+  'createdAt',
+  'createdBy',
+]
 
 export default class UserController {
 
@@ -44,33 +64,16 @@ export default class UserController {
    * @param ctx 
    */
   public static async queryInfo(ctx: Context): Promise<void> {
-    const authorization = ctx.header['authorization'];
-    const token = authorization.split(' ')[1];
-    const {user} = jwt.decode(token);
+    const user = store.getLoginer(ctx);
     let result=null;
     try {
-      result = await DBHelper.manager().findOne(T_User,{
-        select:[
-          'id',
-          'loginName',
-          'userName',
-          'nickName',
-          'age',
-          'mobile',
-          'email',
-          'gender',
-          'remark',
-          'state',
-          'address',
-          'avatar',
-          'createdAt',
-          'createdBy',
-        ],
+      result = await DBHelper.manager().findOne('T_User',{
+        select:select,
         where:{
           id:user.id,
         },
       });
-      result.permissions = userPermission.ADMIN;
+      result = {...result,...{permissions:userPermission.ADMIN}};
     } catch (error) {
       
     }
@@ -82,7 +85,15 @@ export default class UserController {
    * @param ctx 
    */
   public static async queryById(ctx: Context): Promise<void> {
-    console.log(ctx);
+    const {id} = ctx.params;
+    const model = await DBHelper.manager().findOne('T_User',{
+      select,
+      where:{id},
+    });
+    if(model&&model.addressCode){
+      model.addressCode = JSON.parse(model.addressCode);
+    }
+    ctx.json({data:model});
   }
   /**
    * @description: 获取所有用户列表
@@ -101,21 +112,27 @@ export default class UserController {
    * @return: 
    */
   public static async getListByPage(ctx: Context): Promise<void> {
-    const params = ctx.getParams;
-    const data = (ctx.request as any).body;
-    const {sex=null,state=0} = data;
+    const {offset,limit,params} = ctx.getParams;
+    const {gender=0,state=1} = params||{};
     const options = DBHelper.getManyOptions<T_User>({
-      offset:params.offset,
-      limit:params.limit,
+      offset,
+      limit,
       order:{id:'ASC'},
       where:{
         state,
-        sex,
+        gender,
       }
     });
     try {
       const pages = await DBHelper.respository(T_User).findAndCount(options);
-      ctx.page({list:pages[0],total:pages[1]})
+      const list = pages[0].map(user=>{
+        if(user.addressCode){
+          user.addressCode = JSON.parse(user.addressCode);
+          user.loginPwd= '';
+        }
+        return user;
+      });
+      ctx.page({list:list,total:pages[1]})
     } catch (error) {
       throw(error)
     }
@@ -126,18 +143,26 @@ export default class UserController {
    * @return: 
    */
   public static async add(ctx: Context): Promise<void> {
-    let user = (ctx.request as any).body;
-    
+    const PWD = '123456';
+    let user = ctx.getParams.params;
     let model = new T_User();
     model.userName = user.userName;
     model.loginName = user.loginName;
-    model.loginPwd = cryptoPwd('123456',user.loginName);
+    model.nickName = user.nickName;
+    model.loginPwd = cryptoPwd(PWD,user.loginName);
     model.mobile = user.mobile;
     model.remark =  user.remark;
-    model.sex =  user.sex;
-    model.state = 0;
-    model.createdBy = '0';
+    model.gender =  user.gender;
+    model.state = user.state;
+    const currentUser = store.getLoginer(ctx);
+    model.createdBy = currentUser.id;
     model.createdAt = parseInt((Date.now()/1000).toString());
+    model.address = user.address;
+    model.addressCode = JSON.stringify(user.addressCode);
+    model.familyAddress = user.familyAddress;
+    model.age = user.age;
+    model.avatar = user.avatar;
+    model.email = user.email;
     try {
       const result = await DBHelper.respository(T_User).save(model);
       ctx.json({data:result,msg:ADD_SUCCESS});
@@ -155,7 +180,21 @@ export default class UserController {
     const { id } = data;
     const model = await DBHelper.respository(T_User).findOne(id);
     if( model ){
-      model.updatedBy = '1';
+      let user = ctx.getParams.params;
+      const currentUser = store.getLoginer(ctx);
+      model.userName = user.userName;
+      model.nickName = user.nickName;
+      model.mobile = user.mobile;
+      model.remark =  user.remark;
+      model.gender =  user.gender;
+      model.state = user.state;
+      model.address = user.address;
+      model.addressCode = JSON.stringify(user.addressCode);
+      model.familyAddress = user.familyAddress;
+      model.age = user.age;
+      model.avatar = user.avatar;
+      model.email = user.email;
+      model.updatedBy = currentUser.id;
       model.updatedAt = parseInt((Date.now()/1000).toString());
       try {
         const result = await DBHelper.respository(T_User).save(model);

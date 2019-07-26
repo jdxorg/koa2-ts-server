@@ -4,7 +4,9 @@ import Errors from '../entity/mongo/Error';
 import { T_User_Login_Info } from '../entity/mysql';
 import { Guid , dateFormat,DBHelper } from '../utils/tools';
 import { CUR_USER,SYSTEM_PLATFORM } from '../constants/index';
+import { Store } from '../core';
 
+const store = new Store;
 export default class LogsController {
 
   /**
@@ -56,13 +58,14 @@ export default class LogsController {
       model.resData = ctx.body;
       model.protocol = ctx.protocol;
       model.createdAt = dateFormat(Date.now(),'YYYY/MM/DD HH:mm:ss.SSS');
-      model.createdBy = ctx.state['CUR_USER']?ctx.state['CUR_USER'].id:model.ip;
+      const user = store.getLoginer(ctx);
+      model.createdBy = user?user.id:model.ip;
       model.method = method;
       if(method === 'GET') {
         model.params = ctx.querystring;
       } else if(/^P(U|OS)T$/.test(method)) {
         let params = (ctx.request as any ).body;
-        if(/^\/account\/login$/.test(ctx.path)){
+        if(/^\/account\/login$/.test(ctx.path)&&params){
           params['loginPwd'] = '******';
         }
         model.params = params;
@@ -95,7 +98,8 @@ export default class LogsController {
     model.resData = ctx.body;
     model.protocol = ctx.protocol;
     model.createdAt = dateFormat(Date.now(),'YYYY/MM/DD HH:mm:ss.SSS');
-    model.createdBy = ctx.state['CUR_USER'] ? ctx.state['CUR_USER'].id : model.ip;
+    const user = store.getLoginer(ctx);
+    model.createdBy = user ? user.id : model.ip;
 
     model.status = options.status;
     model.errors = options.errors;
@@ -106,7 +110,7 @@ export default class LogsController {
       model.params = ctx.querystring;
     } else if(/^P(U|OS)T$/.test(method)){
       let params = (ctx.request as any ).body;
-      if(/^\/account\/login$/.test(ctx.path)){
+      if(/^\/account\/login$/.test(ctx.path)&&params){
         params['loginPwd'] = '******';
       }
       model.params = params;

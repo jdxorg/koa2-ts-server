@@ -59,6 +59,16 @@ export default class T_User extends BaseEntity {
   address?: string;
 
   @Column({
+    nullable:true
+  })
+  addressCode?:string;
+
+  @Column({
+    nullable:true
+  })
+  familyAddress?: string;
+
+  @Column({
     nullable:true 
   })
   ///头像

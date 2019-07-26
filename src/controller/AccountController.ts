@@ -33,7 +33,6 @@ export default class AccountController {
           sid: `${JWT_TOKEN}_${result.id}`,
           maxAge: EXP_TIME // millisecond
         });
-        ctx.state[CUR_USER] = result;
         ctx.json({ data: token });
       } else {
         ctx.throw(400, PASSWORD_ERROR);
@@ -44,15 +43,13 @@ export default class AccountController {
   }
 
   public static async logout(ctx: Context) {
-    const tokens = ctx.header['authorization'];
-    const token = tokens.split(' ')[1];
-    const store = new Store;
-    const user = jwt.verify(token,JWT_SECRET).user;
+    const user = store.getLoginer(ctx);
     try {
-      ctx.state[CUR_USER] = null;
       //删除redis里的token令牌
-      await store.destroy(`${JWT_TOKEN}_${user.id}`);
-      await LogsController.addLoginInfo(ctx,'logout',user.id);
+      if(user){
+        await store.destroy(`${JWT_TOKEN}_${user.id}`);
+        await LogsController.addLoginInfo(ctx,'logout',user.id);
+      }
       ctx.json({data:null, msg: LOGOUT_SUCCESS });
     } catch (error) {
       ctx.json({data:null, msg: TOEKN_INVALID,code:ErrorCode.TokenInvalid });
