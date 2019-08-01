@@ -14,7 +14,10 @@ import {
   account_upload_file,
   account_upload_files,
   account_user,
+  account_users,
   account_userInfo,
+  accoutn_user_deleteMany,
+  accoutn_user_permission,
 } from './api';
 const router = new Router();
 
@@ -26,8 +29,11 @@ router
   .post(account_user, UserController.add)
   .put(`${account_user}/:id`, UserController.modify)
   .delete(`${account_user}/:id`, UserController.removeById)
+  .post(`${accoutn_user_deleteMany}`,UserController.removeByIds)
   .get(`${account_user}/:id`,UserController.queryById)
   .get(account_userInfo,UserController.queryInfo)
+  .get(account_users,UserController.getList)
+  .put(`${accoutn_user_permission}/:id`,UserController.modifyPermission)
 
   .post(account_upload_file,UploadController.uploadFile)
   .post(account_upload_files,UploadController.uploadFiles)

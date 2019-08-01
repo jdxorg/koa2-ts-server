@@ -12,7 +12,8 @@ interface IManyOptions {
   offset: number,
   limit: number,
   order?: object,
-  where?: object
+  where?: object,
+  select?: any,
 }
 export class DBHelper {
 
@@ -39,6 +40,7 @@ export class DBHelper {
       take: params.limit,
       order: params.order||{},
       where: params.where||{},
+      select: params.select,
     }
     return options;
   }

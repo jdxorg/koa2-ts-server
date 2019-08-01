@@ -15,14 +15,14 @@ export default class AccountController {
     const inputs: any = (ctx.request as any).body;
     const loginName: string = inputs.username;
     const loginPwd: string = inputs.password;
-    if ((loginName && loginName.length > 0) && (loginPwd && loginPwd.length > 5)) {
+    if (loginName && loginPwd) {
       // 查询数据库
       const result = await DBHelper.manager().findOne(T_User, {
         select: ['id', 'loginName', 'userName','nickName','age', 'gender', 'state'],
         where: {
-          username: loginName,
-          password: cryptoPwd(loginPwd, loginName)
-        }
+          loginName,
+          loginPwd: cryptoPwd(loginPwd, loginName)
+        },
       });
       if (result) {
         //生成令牌
@@ -35,7 +35,7 @@ export default class AccountController {
         });
         ctx.json({ data: token });
       } else {
-        ctx.throw(400, PASSWORD_ERROR);
+        ctx.json({data:null,msg:PASSWORD_ERROR});
       }
     } else {
       ctx.throw(400, PASSWORD_ERROR);

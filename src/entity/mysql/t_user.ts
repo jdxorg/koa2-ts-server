@@ -1,5 +1,6 @@
-import {Entity, Column} from "typeorm";
+import {Entity, Column, OneToMany} from "typeorm";
 import { BaseEntity } from './BaseEntity'
+import T_User_Role from "./t_user_role";
 
 @Entity('t_user')
 export default class T_User extends BaseEntity {
@@ -61,7 +62,7 @@ export default class T_User extends BaseEntity {
   @Column({
     nullable:true
   })
-  addressCode?:string;
+  addressCode?: string;
 
   @Column({
     nullable:true
@@ -73,4 +74,12 @@ export default class T_User extends BaseEntity {
   })
   ///头像
   avatar?: string;
+
+  @Column({
+    nullable: true,
+  })
+  visit?: string;
+
+  @OneToMany(() => T_User_Role, relation=> relation.user)
+  relations: T_User_Role[];
 }

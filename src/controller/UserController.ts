@@ -2,7 +2,7 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-26 17:48:09
+ * @LastEditTime: 2019-07-31 15:55:25
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
@@ -17,27 +17,13 @@ import {
   DELETE_FAIL,
   NO_RECORD
 } from '../constants/message';
-import { Store } from '../core';
+import { setOwner,getLoginer } from './common';
 // import BaseController from '../abstract/BaseController';
+import T_Menu from '../entity/mysql/t_menu';
+import T_Role from '../entity/mysql/t_role';
+
 const jwt = require('jsonwebtoken');
-const store = new Store();
-const EnumRoleType = {
-  ADMIN: 'admin',
-  DEFAULT: 'guest',
-  DEVELOPER: 'developer',
-}
-const userPermission = {
-  DEFAULT: {
-    visit: ['1', '2', '21', '7', '5', '51', '52', '53'],
-    role: EnumRoleType.DEFAULT,
-  },
-  ADMIN: {
-    role: EnumRoleType.ADMIN,
-  },
-  DEVELOPER: {
-    role: EnumRoleType.DEVELOPER,
-  },
-}
+
 const select = [
   'id',
   'loginName',
@@ -59,25 +45,60 @@ const select = [
 
 export default class UserController {
 
+  private static async getUserInfo(id: number): Promise<T_User|undefined> {
+    let result: T_User|undefined;
+    try {
+      result = await DBHelper.respository(T_User)
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.loginName',
+        'user.userName',
+        'user.nickName',
+        'user.age',
+        'user.mobile',
+        'user.email',
+        'user.gender',
+        'user.remark',
+        'user.state',
+        'user.address',
+        'user.addressCode',
+        'user.familyAddress',
+        'user.avatar',
+        'user.visit',
+      ])
+      .leftJoinAndSelect('user.relations','relation')
+      .where('user.id= :id',{id})
+      .getOne();
+      if(result){
+        result.addressCode = result.addressCode?JSON.parse(result.addressCode):null;
+        result.visit = result.visit?JSON.parse(result.visit):null;
+        const ids  = result.relations?result.relations.map(r=> r.roleId):[];
+        if(ids){
+          const roles = await DBHelper.manager().findByIds(T_Role,ids);
+          result.roles = roles.map(r=>r.roleName);
+        }
+      }
+    } catch (error) {
+      throw error;
+    }
+    return result;
+  }
+
   /**
-   * 获取当前用户
+   * 获取当前登录用户
    * @param ctx 
    */
   public static async queryInfo(ctx: Context): Promise<void> {
-    const user = store.getLoginer(ctx);
-    let result=null;
+    const user = getLoginer(ctx);
     try {
-      result = await DBHelper.manager().findOne('T_User',{
-        select:select,
-        where:{
-          id:user.id,
-        },
-      });
-      result = {...result,...{permissions:userPermission.ADMIN}};
+      const result = await UserController.getUserInfo(user?user.id:'');
+      const menus = await UserController.getMenusByIds(result&&result.visit?result.visit:'');
+      result.menus = menus;
+      ctx.json({data:result});
     } catch (error) {
-      
+      ctx.json({data:null,msg:error.message});
     }
-    ctx.json({data:result});
   }
 
   /**
@@ -86,24 +107,12 @@ export default class UserController {
    */
   public static async queryById(ctx: Context): Promise<void> {
     const {id} = ctx.params;
-    const model = await DBHelper.manager().findOne('T_User',{
-      select,
-      where:{id},
-    });
-    if(model&&model.addressCode){
-      model.addressCode = JSON.parse(model.addressCode);
+    try {
+      const result = await UserController.getUserInfo(id);
+      ctx.json({data:result});
+    } catch (error) {
+      ctx.json({data:null,msg:error.message});
     }
-    ctx.json({data:model});
-  }
-  /**
-   * @description: 获取所有用户列表
-   * @param {type} 
-   * @return: 
-   */
-  public static async getList(ctx: Context): Promise<void> {
-    const users = await DBHelper.manager().find(T_User);
-    
-    ctx.json({data:users})
   }
 
   /**
@@ -113,22 +122,63 @@ export default class UserController {
    */
   public static async getListByPage(ctx: Context): Promise<void> {
     const {offset,limit,params} = ctx.getParams;
-    const {gender=0,state=1} = params||{};
-    const options = DBHelper.getManyOptions<T_User>({
-      offset,
-      limit,
-      order:{id:'ASC'},
-      where:{
-        state,
-        gender,
-      }
-    });
+    const {state=1,...rest} = params||{};
+    // const options = DBHelper.getManyOptions<T_User>({
+    //   offset,
+    //   limit,
+    //   order:{id:'ASC'},
+    //   where:{
+    //     state,
+    //     ...rest,
+    //   },
+    //   select,
+    // });
+    // const pages = await DBHelper.respository(T_User).findAndCount(options)
     try {
-      const pages = await DBHelper.respository(T_User).findAndCount(options);
+      const query = DBHelper.respository(T_User)
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.loginName',
+        'user.userName',
+        'user.nickName',
+        'user.age',
+        'user.mobile',
+        'user.email',
+        'user.gender',
+        'user.remark',
+        'user.state',
+        'user.address',
+        'user.addressCode',
+        'user.familyAddress',
+        'user.avatar',
+        'user.createdAt',
+        'user.createdBy',
+        'user.updatedAt',
+        'user.updatedBy',
+      ])
+      .where('user.state=:state');
+      if(rest && rest.userName){
+        query.andWhere('user.userName= :userName');
+      }
+      if(rest && rest.addressCode){
+        query.andWhere('user.addressCode= :addressCode');
+      }
+      if(rest && rest.createBegin){
+        query.andWhere('user.createdAt>= :createBegin');
+      }
+      if(rest && rest.createEnd){
+        query.andWhere('user.createdAt<= :createEnd');
+      }
+      const pages = await query.orderBy('user.id','ASC')
+      .offset(offset)
+      .limit(limit)
+      .setParameters({state,...rest})
+      .getManyAndCount();
+
       const list = pages[0].map(user=>{
         if(user.addressCode){
           user.addressCode = JSON.parse(user.addressCode);
-          user.loginPwd= '';
         }
         return user;
       });
@@ -137,6 +187,29 @@ export default class UserController {
       throw(error)
     }
   }
+
+  /**
+   * @description: 获取列表
+   * @param {type} 
+   * @return: 
+   */
+  public static async getList(ctx: Context): Promise<void> {
+    try {
+      const result = await DBHelper.respository(T_User)
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.loginName',
+        'user.userName'
+      ])
+      .orderBy('user.id','ASC')
+      .getMany();
+      ctx.json({data:result});
+    } catch (error) {
+      ctx.json({data:null,msg:error.message});
+    }
+  }
+
   /**
    * @description: 新增用户
    * @param {type} 
@@ -154,20 +227,18 @@ export default class UserController {
     model.remark =  user.remark;
     model.gender =  user.gender;
     model.state = user.state;
-    const currentUser = store.getLoginer(ctx);
-    model.createdBy = currentUser.id;
-    model.createdAt = parseInt((Date.now()/1000).toString());
     model.address = user.address;
     model.addressCode = JSON.stringify(user.addressCode);
     model.familyAddress = user.familyAddress;
     model.age = user.age;
     model.avatar = user.avatar;
     model.email = user.email;
+    setOwner(model,ctx,'insert');
     try {
       const result = await DBHelper.respository(T_User).save(model);
       ctx.json({data:result,msg:ADD_SUCCESS});
     } catch (error) {
-      ctx.json({data:null,msg:ADD_FAIL});
+      ctx.json({data:null,msg:error.message});
     }
   }
   /**
@@ -181,7 +252,6 @@ export default class UserController {
     const model = await DBHelper.respository(T_User).findOne(id);
     if( model ){
       let user = ctx.getParams.params;
-      const currentUser = store.getLoginer(ctx);
       model.userName = user.userName;
       model.nickName = user.nickName;
       model.mobile = user.mobile;
@@ -194,18 +264,34 @@ export default class UserController {
       model.age = user.age;
       model.avatar = user.avatar;
       model.email = user.email;
-      model.updatedBy = currentUser.id;
-      model.updatedAt = parseInt((Date.now()/1000).toString());
+      setOwner(model,ctx);
       try {
         const result = await DBHelper.respository(T_User).save(model);
         ctx.json({data:result,msg:MODIFY_SUCCESS});
       } catch (error) {
-        ctx.json({data:id,msg:MODIFY_FAIL});
+        ctx.json({data:null,msg:error.message});
       }
     }else{
-      ctx.json({data:id,msg:NO_RECORD});
+      ctx.json({data:null,msg:NO_RECORD});
     }
   }
+
+  public static async modifyPermission(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    let {visit} = ctx.getParams.params;
+    try {
+      const result = await DBHelper.respository(T_User)
+      .createQueryBuilder()
+      .update(T_User)
+      .set({visit:visit?JSON.stringify(visit):''})
+      .where("id= :id",{id})
+      .execute();
+      ctx.json({data:id,msg:MODIFY_SUCCESS});
+    } catch (error) {
+      ctx.json({data:null,msg:error.message});
+    }
+  }
+
   /**
    * @description: 删除用户
    * @param {type} 
@@ -218,98 +304,95 @@ export default class UserController {
     if(model){
       try {
         const result = await DBHelper.respository(T_User).remove(model);
-        ctx.body = {code:0,message:'success'};
         ctx.json({data:id,msg:DELETE_SUCCESS});
       } catch (error) {
-        ctx.json({data:id,msg:DELETE_FAIL});
+        ctx.json({data:null,msg:DELETE_FAIL});
       }
     }else{
-      ctx.json({data:id,msg:NO_RECORD});
+      ctx.json({data:null,msg:NO_RECORD});
     }
   }
 
-  public static async getMenus(ctx: Context) {
-    const database = [
-      { id: '1',
-        icon: 'dashboard',
-        name: 'Dashboard',
-        zh: {
-          name: '仪表盘'
-        },
-        route: '/dashboard',
+  /**
+   * @description: 批量删除
+   * @param {type} 
+   * @return: 
+   */
+  public static async removeByIds(ctx: Context): Promise<void>{
+    let params = ctx.getParams.params;
+    const { ids } = params;
+    try {
+      const users = await DBHelper.respository(T_User).findByIds(ids);
+      const result = await DBHelper.respository(T_User).remove(users);
+      ctx.json({data:result,msg:DELETE_SUCCESS});
+    } catch (error) {
+      ctx.json({data:null,msg:DELETE_FAIL});
+    }
+  } 
+
+  private static recursion(result: T_Menu[] ,item: T_Menu): object{
+    let children = result.filter(p=> p.parentid === item.id);
+    children = children.map(child=>{
+      return UserController.recursion(result,child)
+    })
+    return{
+      id:item.id.toString(),
+      key:item.id.toString(),
+      parentid:item.parentid,
+      name:item.name,
+      zh:{
+        name:item.zh,
       },
-      {
-        id: '2',
-        name: 'Account',
-        zh: {
-          name: '账户管理'
-        },
-        icon: 'user',
-        route:'/account',
-        children:[
-          {id:'21',parentid:'2',name:'user',zh: {name: '用户管理'},icon:'user',route:'/account/user'},
-          {id:'22',parentid:'2',name:'role',zh: {name: '角色管理'},icon:'user',route:'/account/role'},
-        ]
-      },
-      {
-        id: '7',
-        name: 'Posts',
-        zh: {
-          name: '岗位管理'
-        },
-        icon: 'shopping-cart',
-        route: '/post',
-      },
-      {
-        id: '3',
-        name: 'Request',
-        zh: {
-          name: 'Request'
-        },
-        icon: 'api',
-        route: '/request',
-      },
-      {
-        id: '4',
-        name: 'UI Element',
-        zh: {
-          name: 'UI组件'
-        },
-        icon: 'camera-o',
-        route:'/UIElement',
-        children:[
-          { id: '41',parentid: '4',name: 'Button',zh: {name: 'Button'},icon: 'edit',route: '/UIElement/button',},
-          { id: '42',parentid: '4',name: 'Form',zh: {name: 'Form'},icon: 'edit',route: '/UIElement/form',},
-          { id: '43',parentid: '4',name: 'Table',zh: {name: 'Table'},icon: 'edit',route: '/UIElement/table',},
-          { id: '44',parentid: '4',name: 'Editor',zh: {name: 'Editor'},icon: 'edit',route: '/UIElement/editor',},
-        ]
-      },
-      {
-        id: '5',
-        name: 'Charts',
-        zh: {
-          name: 'Charts'
-        },
-        icon: 'code-o',
-        route:'/chart',
-        children:[
-          {id: '51', parentid: '5',name: 'ECharts',zh: { name: 'ECharts'}, icon: 'line-chart',route: '/chart/ECharts',},
-          {id: '52', parentid: '5',name: 'HighCharts',zh: { name: 'HighCharts'}, icon: 'bar-chart',route: '/chart/highCharts',},
-          {id: '53', parentid: '5',name: 'Rechartst',zh: { name: 'Rechartst'}, icon: 'area-chart',route: '/chart/Recharts',},
-        ]
-      },
-      {
-        id: '6',
-        name: 'Test',
-        zh: {
-          name: '测试'
-        },
-        icon: 'code-o',
-        route:'/test',
-        hideInMenu: true,
-        authority: ['admin'],
-      },
-    ]
-    ctx.json({data:database})
+      title:item.name,
+      icon:item.icon,
+      route:item.route,
+      display:!!item.display,
+      children:children.length>0?children:null,
+    }
+  }
+  public static async getMenus(ctx: Context): Promise<void>{
+    const result: T_Menu[] = await DBHelper.respository(T_Menu)
+    .createQueryBuilder('menu')
+    .select([
+      'menu.id',
+      'menu.parentid',
+      'menu.name',
+      'menu.zh',
+      'menu.icon',
+      'menu.route',
+      'menu.display'
+    ])
+    .getMany();
+    const roots = result.filter(p=>p.parentid===null);
+    const menus = roots.map(o=>{
+      return UserController.recursion(result,o);
+    })
+    ctx.json({data:menus})
+  }
+  
+  public static async getMenusByIds(ids:string):Promise<object[]> {
+    let menus: object[] = [];
+    try {
+      let result: T_Menu[] = await DBHelper.respository(T_Menu)
+      .createQueryBuilder('menu')
+      .select([
+        'menu.id',
+        'menu.parentid',
+        'menu.name',
+        'menu.zh',
+        'menu.icon',
+        'menu.route',
+        'menu.display'
+      ])
+      .where('menu.id in (:ids)',{ids})
+      .getMany();
+      const roots = result.filter(p=>p.parentid===null);
+      menus = roots.map(o=>{
+        return UserController.recursion(result,o);
+      })
+    } catch (error) {
+      throw error;
+    }
+    return menus;
   }
 }

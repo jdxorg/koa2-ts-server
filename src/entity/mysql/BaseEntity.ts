@@ -5,16 +5,26 @@ export class BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  createdBy: string;
+  @Column({
+    nullable:true
+  })
+  createdBy?: string;
 
-  @Column()
-  createdAt: number;
+  @Column({
+    type:'bigint',
+    nullable:true
+  })
+  createdAt?: number;
 
-  @Column({select: false,nullable:true})
+  @Column({
+    nullable:true
+  })
   updatedBy?: string;
 
-  @Column({select: false,nullable:true})
+  @Column({
+    type:'bigint',
+    nullable:true
+  })
   updatedAt?: number;
 
 }
