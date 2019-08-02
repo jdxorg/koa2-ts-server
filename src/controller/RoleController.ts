@@ -2,12 +2,12 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-30 17:12:05
+ * @LastEditTime: 2019-08-02 11:12:33
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
 import { cryptoPwd,DBHelper } from '../utils/tools';
-import {T_Role,T_User_Role} from '../entity/mysql';
+import {T_Role,T_User_Role,T_User} from '../entity/mysql';
 import { 
   ADD_SUCCESS,
   ADD_FAIL,
@@ -20,7 +20,6 @@ import {
 
 import { setOwner } from './common';
 import user from '../route/user';
-import T_User from '../../out/entity/mysql/t_user';
 export default class UserController {
 
   /**
