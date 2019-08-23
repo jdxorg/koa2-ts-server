@@ -1,14 +1,21 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-07-29 17:31:25
+ * @LastEditTime: 2019-08-23 15:35:16
+ * @LastEditors: Please set LastEditors
+ */
 import { methodNotAllowed, notImplemented } from 'boom';
 import * as compose from 'koa-compose';
 import * as Router from 'koa-router';
 
-import RoleController from '../controller/RoleController';
+import RoleController from '../../controller/pc/RoleController';
 
 import {
   account_role,
   account_role_deleteMany,
   account_role_relations,
-} from './api';
+} from '../api';
 const router = new Router();
 
 router

@@ -2,12 +2,12 @@
  * @Description: UserController
  * @Author: jiangdexiao@icarbonx.com
  * @Date: 2019-06-21 17:23:30
- * @LastEditTime: 2019-07-31 15:55:25
+ * @LastEditTime: 2019-08-23 15:32:19
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
-import { cryptoPwd,DBHelper } from '../utils/tools';
-import {T_User} from '../entity/mysql';
+import { cryptoPwd,DBHelper } from '../../utils/tools';
+import {T_User} from '../../entity/mysql';
 import { 
   ADD_SUCCESS,
   ADD_FAIL,
@@ -16,11 +16,11 @@ import {
   DELETE_SUCCESS,
   DELETE_FAIL,
   NO_RECORD
-} from '../constants/message';
-import { setOwner,getLoginer } from './common';
+} from '../../constants/message';
+import { setOwner,getLoginer } from '../../core/lib/common';
 // import BaseController from '../abstract/BaseController';
-import T_Menu from '../entity/mysql/t_menu';
-import T_Role from '../entity/mysql/t_role';
+import T_Menu from '../../entity/mysql/t_menu';
+import T_Role from '../../entity/mysql/t_role';
 
 const jwt = require('jsonwebtoken');
 

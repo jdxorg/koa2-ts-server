@@ -9,10 +9,11 @@
     "lint:fix": "tslint 'src/**/*.ts' --fix",
     "test": "jest"
   },
-  "author": "Mohammad Umair Khan <mohammad.umair.k@gmail.com>",
+  "author": "jdx 289608944@qq.com",
   "license": "MIT",
   "dependencies": {
     "@types/store": "^2.0.2",
+    "axios": "^0.19.0",
     "boom": "^7.1.1",
     "convict": "^4.0.2",
     "debug": "^3.1.0",
@@ -28,6 +29,7 @@
     "koa-static": "^5.0.0",
     "mongodb": "^3.2.7",
     "mysql": "^2.17.1",
+    "qs": "^6.8.0",
     "reflect-metadata": "^0.1.13",
     "store": "^2.0.12",
     "ts-node": "^4.1.0",
@@ -43,6 +45,7 @@
     "@types/koa-json": "^2.0.16",
     "@types/koa-logger": "^3.1.1",
     "@types/koa-router": "^7.0.27",
+    "@types/qs": "^6.5.3",
     "@types/store": "^2.0.2",
     "body-parser": "^1.18.2",
     "husky": "^0.15.0-rc.8",

@@ -1,11 +1,11 @@
 import { Context } from 'koa';
-import { cryptoPwd,dateFormat,DBHelper} from '../utils/tools';
-import { Store } from '../core';
-import {T_User} from '../entity/mysql';
-import { JWT_TOKEN,JWT_SECRET,CUR_USER,EXP_TIME} from '../constants';
-import { LOGIN_SUCCESS,LOGOUT_SUCCESS,PASSWORD_ERROR,TOEKN_INVALID } from '../constants/message';
-import { ErrorCode } from '../constants/code';
-import LogsController from './LogsController';
+import { cryptoPwd,dateFormat,DBHelper} from '../../utils/tools';
+import { Store } from '../../core';
+import {T_User} from '../../entity/mysql';
+import { JWT_TOKEN,JWT_SECRET,CUR_USER,EXP_TIME} from '../../constants';
+import { LOGIN_SUCCESS,LOGOUT_SUCCESS,PASSWORD_ERROR,TOEKN_INVALID } from '../../constants/message';
+import { ErrorCode } from '../../constants/code';
+import LogsController from './../LogsController';
 
 const jwt = require('jsonwebtoken');
 const store = new Store();

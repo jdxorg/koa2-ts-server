@@ -1,5 +1,12 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-07-29 17:42:19
+ * @LastEditTime: 2019-08-23 18:29:37
+ * @LastEditors: dexiaojiang 289608944@qq.com
+ */
 import { Context } from 'koa';
-import { Store } from '../core';
+import { Store } from '../index';
 const store = new Store();
 
 export const setOwner = (model: any,ctx: Context,flag: string = 'update') =>{

@@ -6,8 +6,8 @@
  * @LastEditors: Please set LastEditors
  */
 import { Context } from 'koa';
-import { cryptoPwd,DBHelper } from '../utils/tools';
-import {T_Role,T_User_Role,T_User} from '../entity/mysql';
+import { cryptoPwd,DBHelper } from '../../utils/tools';
+import {T_Role,T_User_Role,T_User} from '../../entity/mysql';
 import { 
   ADD_SUCCESS,
   ADD_FAIL,
@@ -16,10 +16,10 @@ import {
   DELETE_SUCCESS,
   DELETE_FAIL,
   NO_RECORD
-} from '../constants/message';
+} from '../../constants/message';
 
-import { setOwner } from './common';
-import user from '../route/user';
+import { setOwner } from '../../core/lib/common';
+import user from '../../route/pc/user';
 export default class UserController {
 
   /**

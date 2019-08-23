@@ -30,3 +30,7 @@ export const NO_AUTH_URLS = [
   [/\/account\/login/,  /^post|options$/i],
 ]
 
+/**
+ * wexin 
+ */
+export const WEIXIN_SERVER = 'https://api.weixin.qq.com'

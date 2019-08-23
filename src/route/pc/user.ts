@@ -1,11 +1,18 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-07-11 14:10:03
+ * @LastEditTime: 2019-08-23 15:35:27
+ * @LastEditors: Please set LastEditors
+ */
 import { methodNotAllowed, notImplemented } from 'boom';
 import * as compose from 'koa-compose';
 import * as Router from 'koa-router';
 
-import UserController from '../controller/UserController';
-import AccountController from '../controller/AccountController';
-import LogsController from '../controller/LogsController';
-import UploadController from '../controller/UploadController';
+import UserController from '../../controller/pc/UserController';
+import AccountController from '../../controller/pc/AccountController';
+import LogsController from '../../controller/LogsController';
+import UploadController from '../../controller/UploadController';
 
 import {
   account_login,
@@ -18,7 +25,7 @@ import {
   account_userInfo,
   accoutn_user_deleteMany,
   accoutn_user_permission,
-} from './api';
+} from '../api';
 const router = new Router();
 
 router
