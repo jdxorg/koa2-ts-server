@@ -2,7 +2,7 @@
  * @Author: dexiaojiang 289608944@qq.com
  * @Description: In User Settings Edit
  * @Date: 2019-08-23 15:36:22
- * @LastEditTime: 2019-08-23 18:38:13
+ * @LastEditTime: 2019-08-23 18:46:11
  * @LastEditors: dexiaojiang 289608944@qq.com
  */
 
@@ -29,10 +29,9 @@ export default class Auth {
     if( !SECRET ){
       throw 'SECRET is null'
     }
-    const wechat_login_url: string = `${jscode2session}?appid=${APPID}&secret=${SECRET}&js_code=${code}&grant_type=authorization_code`
     
     return HttpRequest.sendRequest({
-      url:wechat_login_url,
+      url:jscode2session,
       data:{
         appid:APPID,
         secret:SECRET,
