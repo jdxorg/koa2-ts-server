@@ -7,10 +7,10 @@ import {
   EntityManager,
   MongoEntityManager
 } from 'typeorm';
-
+const ObjectID = require('mongodb').ObjectID
 interface IManyOptions {
-  offset: number,
-  limit: number,
+  offset?: number,
+  limit?: number,
   order?: object,
   where?: object,
   select?: any,
@@ -43,5 +43,9 @@ export class DBHelper {
       select: params.select,
     }
     return options;
+  }
+
+  public static getObjectId<T>(_id: T): T {
+    return new ObjectID(_id)
   }
 }

@@ -1,3 +1,10 @@
+/*
+ * @Author: dexiaojiang 289608944@qq.com
+ * @Description: In User Settings Edit
+ * @Date: 2019-07-16 13:59:06
+ * @LastEditTime: 2019-08-27 15:25:54
+ * @LastEditors: dexiaojiang 289608944@qq.com
+ */
 import { Context } from 'koa';
 import { NO_AUTH_URLS,JWT_SECRET } from '../constants';
 import { TOEKN_INVALID } from '../constants/message';
@@ -12,7 +19,8 @@ const auth = async(ctx: Context, next: ()=> Promise<any>)=> {
   if(isNoAuth 
     || method === 'OPTIONS' 
     || path === '/favicon.ico'
-    || ~path.indexOf('/images/')) {//如果是跨域预检请求放行
+    || ~path.indexOf('/images/')
+    || ~path.indexOf('/mobile')) {//如果是跨域预检请求放行  移动接口暂时不校验
     await next()
   }else {
     let token;
